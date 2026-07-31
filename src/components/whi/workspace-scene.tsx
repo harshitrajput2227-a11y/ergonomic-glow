@@ -221,7 +221,7 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
       </svg>
 
       {/* corner readouts, instrument-panel style */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-8 gap-y-2 px-6 pb-5 pt-16 md:px-8">
+      <div className="pointer-events-none flex flex-wrap items-center gap-x-8 gap-y-2 px-5 pb-5 pt-4 md:absolute md:inset-x-0 md:bottom-0 md:px-8 md:pt-16">
         {(["light", "temperature", "humidity"] as const).map((k) => (
           <div key={k} className="flex items-baseline gap-2">
             <span className="label-eyebrow">{metrics[k].label}</span>
