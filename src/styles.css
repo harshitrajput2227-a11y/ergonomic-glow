@@ -5,20 +5,21 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Workspace Health Intelligence — futuristic health-tech design system.
- * Deep instrument-panel black, bio-cyan signal, mint/amber/rose health states.
+ * Workspace Health Intelligence — premium consumer-device design system.
+ * Warm graphite room tones, ivory type, one restrained copper accent.
+ * No glows, no gradients-as-decoration: light in this product means light.
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+  --radius-3xl: calc(var(--radius) + 20px);
+  --radius-4xl: calc(var(--radius) + 28px);
 
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
@@ -48,8 +49,7 @@
   --color-warn: var(--state-warn);
   --color-poor: var(--state-poor);
   --color-signal: var(--signal);
-  --color-glass: var(--glass);
-  --color-glass-line: var(--glass-line);
+  --color-hairline: var(--hairline);
   --color-deep: var(--deep);
 
   --color-chart-1: var(--signal);
@@ -60,43 +60,42 @@
 }
 
 :root {
-  --radius: 1rem;
+  --radius: 0.75rem;
 
-  --background: oklch(0.16 0.024 232);
-  --deep: oklch(0.12 0.022 235);
-  --foreground: oklch(0.96 0.012 210);
+  /* room tones — warm graphite, never blue-black */
+  --deep: oklch(0.135 0.006 62);
+  --background: oklch(0.155 0.006 62);
+  --foreground: oklch(0.955 0.006 84);
 
-  --card: oklch(0.21 0.028 233);
-  --card-foreground: oklch(0.96 0.012 210);
-  --popover: oklch(0.19 0.026 233);
-  --popover-foreground: oklch(0.96 0.012 210);
+  --card: oklch(0.19 0.006 62);
+  --card-foreground: oklch(0.955 0.006 84);
+  --popover: oklch(0.185 0.006 62);
+  --popover-foreground: oklch(0.955 0.006 84);
 
-  --primary: oklch(0.82 0.15 191);
-  --primary-foreground: oklch(0.16 0.03 220);
-  --secondary: oklch(0.26 0.03 233);
-  --secondary-foreground: oklch(0.95 0.01 210);
-  --muted: oklch(0.24 0.026 233);
-  --muted-foreground: oklch(0.7 0.028 226);
-  --accent: oklch(0.3 0.045 218);
-  --accent-foreground: oklch(0.96 0.012 210);
-  --destructive: oklch(0.63 0.2 22);
-  --destructive-foreground: oklch(0.98 0.005 210);
+  --primary: oklch(0.955 0.006 84);
+  --primary-foreground: oklch(0.155 0.006 62);
+  --secondary: oklch(0.235 0.006 62);
+  --secondary-foreground: oklch(0.95 0.006 84);
+  --muted: oklch(0.225 0.005 62);
+  --muted-foreground: oklch(0.68 0.008 76);
+  --accent: oklch(0.26 0.008 62);
+  --accent-foreground: oklch(0.955 0.006 84);
+  --destructive: oklch(0.6 0.15 32);
+  --destructive-foreground: oklch(0.98 0.004 84);
 
-  --border: oklch(0.34 0.03 226 / 45%);
-  --input: oklch(0.34 0.03 226 / 55%);
-  --ring: oklch(0.82 0.15 191);
+  --border: oklch(0.99 0.004 84 / 11%);
+  --input: oklch(0.99 0.004 84 / 16%);
+  --ring: oklch(0.8 0.1 62);
 
-  --signal: oklch(0.84 0.15 189);
-  --state-excellent: oklch(0.85 0.17 168);
-  --state-good: oklch(0.84 0.15 189);
-  --state-warn: oklch(0.83 0.16 82);
-  --state-poor: oklch(0.68 0.19 22);
+  /* one accent: warm copper light */
+  --signal: oklch(0.79 0.105 64);
+  --state-excellent: oklch(0.78 0.075 155);
+  --state-good: oklch(0.8 0.07 128);
+  --state-warn: oklch(0.81 0.115 78);
+  --state-poor: oklch(0.66 0.145 32);
 
-  --glass: oklch(0.24 0.03 232 / 55%);
-  --glass-line: oklch(0.72 0.05 205 / 18%);
-
-  --shadow-lift: 0 30px 70px -30px oklch(0.05 0.03 230 / 90%);
-  --glow-signal: 0 0 60px -10px color-mix(in oklab, var(--signal) 55%, transparent);
+  --hairline: oklch(0.99 0.004 84 / 12%);
+  --shadow-lift: 0 40px 90px -50px oklch(0 0 0 / 90%);
 }
 
 @layer base {
@@ -115,26 +114,19 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    font-weight: 500;
   }
 }
 
-@utility glass-panel {
-  background: linear-gradient(
-    155deg,
-    color-mix(in oklab, var(--card) 85%, transparent),
-    color-mix(in oklab, var(--deep) 78%, transparent)
-  );
-  border: 1px solid var(--glass-line);
-  backdrop-filter: blur(18px) saturate(140%);
-  box-shadow: var(--shadow-lift);
+@utility hairline-t {
+  border-top: 1px solid var(--hairline);
 }
 
-@utility grid-floor {
-  background-image:
-    linear-gradient(color-mix(in oklab, var(--signal) 12%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--signal) 12%, transparent) 1px, transparent 1px);
-  background-size: 46px 46px;
+@utility surface {
+  background: color-mix(in oklab, var(--card) 62%, transparent);
+  border: 1px solid var(--hairline);
+  backdrop-filter: blur(14px);
 }
 
 @utility mono-num {
@@ -145,46 +137,24 @@
 
 @utility label-eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.22em;
+  font-size: 0.625rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
 
-@keyframes whi-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.75;
-  }
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
-}
-
-@keyframes whi-orbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes whi-scanline {
-  0% {
-    transform: translateY(-120%);
-  }
-  100% {
-    transform: translateY(320%);
-  }
+@utility display-num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.06em;
+  font-weight: 500;
+  line-height: 0.86;
 }
 
 @keyframes whi-rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -192,30 +162,31 @@
   }
 }
 
-@keyframes whi-drift {
-  0% {
-    transform: translate3d(0, 0, 0);
+@keyframes whi-fade {
+  from {
+    opacity: 0;
   }
-  50% {
-    transform: translate3d(0, -10px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
+  to {
+    opacity: 1;
   }
 }
 
-@utility animate-breathe {
-  animation: whi-breathe 5s ease-in-out infinite;
+@keyframes whi-breath {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }
-@utility animate-orbit {
-  animation: whi-orbit 18s linear infinite;
-}
-@utility animate-scanline {
-  animation: whi-scanline 6s linear infinite;
-}
+
 @utility animate-rise {
-  animation: whi-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: whi-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-@utility animate-drift {
-  animation: whi-drift 7s ease-in-out infinite;
+@utility animate-fade {
+  animation: whi-fade 0.8s ease both;
+}
+@utility animate-breath {
+  animation: whi-breath 4.5s ease-in-out infinite;
 }

@@ -31,7 +31,7 @@ export function Analytics({
 
   return (
     <section className="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
-      <div className="glass-panel rounded-[28px] p-6">
+      <div className="surface rounded-[20px] p-6">
         <div className="flex items-end justify-between">
           <div>
             <span className="label-eyebrow">Session telemetry</span>
@@ -92,12 +92,12 @@ export function Analytics({
         </div>
       </div>
 
-      <div className="glass-panel rounded-[28px] p-6">
+      <div className="surface rounded-[20px] p-6">
         <span className="label-eyebrow">Session summary</span>
         <h2 className="mt-1 text-xl font-semibold">Your {mins}-minute session</h2>
 
         <div className="mt-5 flex items-baseline gap-2">
-          <span className="mono-num text-5xl font-semibold text-signal">{avg}</span>
+          <span className="mono-num text-5xl font-semibold text-foreground">{avg}</span>
           <span className="text-sm text-muted-foreground">average · {statusOf(avg)}</span>
         </div>
 
