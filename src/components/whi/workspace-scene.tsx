@@ -135,7 +135,7 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
         <rect x="660" y="450" width="128" height="8" rx="3" fill="oklch(0.3 0.01 62)" />
 
         {/* person silhouette — moves with measured distance */}
-        <g style={{ transform: `translateX(${(personX - 540).toFixed(1)}px)`, transition: `transform ${ease}` }}>
+        <g style={{ transform: `translateX(${(personX - 30).toFixed(1)}px)`, transition: `transform ${ease}` }}>
           <g fill="oklch(0.1 0.006 62)">
             {/* chair */}
             <rect x="-118" y="300" width="16" height="170" rx="6" fill="oklch(0.2 0.008 62)" />
