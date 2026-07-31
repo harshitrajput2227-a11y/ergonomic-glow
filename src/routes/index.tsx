@@ -62,6 +62,15 @@ function Dashboard() {
   const smooth = useSmoothNumber(score, 0.1);
   const status = statusOf(score);
   const tone = statusTone(status);
+  const headline =
+    status === "Excellent"
+      ? "in excellent shape."
+      : status === "Good"
+        ? "in good shape."
+        : status === "Needs Improvement"
+          ? "asking for a change."
+          : "working against you.";
+
 
   /** Single commit point: swap for the Firebase subscription when hardware lands. */
   const applyReading = useCallback((next: SensorReading) => {
