@@ -110,11 +110,12 @@ function Dashboard() {
       {/* ACT ONE — the room */}
       <section className="mx-auto max-w-[1240px] px-6 pt-6 md:px-10 md:pt-10">
         <h1 className="max-w-[16ch] text-[42px] leading-[0.98] md:text-[76px]">
-          Your desk is
+          Your workspace is
           <span className="block" style={{ color: tone.color, transition: "color 900ms ease" }}>
-            {status.toLowerCase()}.
+            {headline}
           </span>
         </h1>
+
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_300px] lg:items-end">
           <div className="animate-fade">
