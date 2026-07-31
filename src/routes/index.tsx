@@ -1,19 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Activity, ChevronDown } from "lucide-react";
 
-import { ScoreOrb } from "@/components/whi/score-orb";
 import { WorkspaceScene } from "@/components/whi/workspace-scene";
-import { SimulationPanel } from "@/components/whi/simulation-panel";
-import { ReasoningPanel } from "@/components/whi/reasoning-panel";
-import { Recommendations } from "@/components/whi/recommendations";
+import { ControlDeck } from "@/components/whi/control-deck";
+import { Narrative } from "@/components/whi/narrative";
+import { Guidance } from "@/components/whi/guidance";
 import { BreakTimer } from "@/components/whi/break-timer";
 import { Analytics, type HistoryPoint } from "@/components/whi/analytics";
+import { useSmoothNumber } from "@/lib/use-smooth-number";
 import {
   defaultReading,
   explain,
   healthScore,
   recommend,
+  statusOf,
+  statusTone,
   type MetricKey,
   type Reasoning,
   type SensorReading,
@@ -22,17 +23,17 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Workspace Health Intelligence — Live Ergonomic Score & AI Coach" },
+      { title: "WHI — The workspace that tells you how it feels" },
       {
         name: "description",
         content:
-          "WHI reads screen distance, light, temperature and humidity to score your desk 0-100, explain every change, and coach you back to a healthy workspace.",
+          "Workspace Health Intelligence reads screen distance, light, temperature and humidity, renders your desk live, and explains in plain language why your health score moved.",
       },
-      { property: "og:title", content: "Workspace Health Intelligence (WHI)" },
+      { property: "og:title", content: "WHI — Workspace Health Intelligence" },
       {
         property: "og:description",
         content:
-          "A live workspace twin that scores your ergonomic environment and explains exactly why it changed.",
+          "A living model of your desk. Watch the room change, see the score move, understand exactly why.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -47,15 +48,22 @@ function Dashboard() {
   const [reasoning, setReasoning] = useState<Reasoning>(() => explain(defaultReading, defaultReading));
   const [stamp, setStamp] = useState(0);
   const [history, setHistory] = useState<HistoryPoint[]>([
-    { t: Date.now(), score: healthScore(defaultReading), ...defaultReading },
+    { t: 0, score: healthScore(defaultReading), ...defaultReading },
   ]);
   const [breaks, setBreaks] = useState(0);
-  const startedAt = useRef(Date.now());
+  const startedAt = useRef(0);
   const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const score = healthScore(reading);
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
-  /** A single commit point: swap this for the Firebase subscription when hardware lands. */
+  const score = healthScore(reading);
+  const smooth = useSmoothNumber(score, 0.1);
+  const status = statusOf(score);
+  const tone = statusTone(status);
+
+  /** Single commit point: swap for the Firebase subscription when hardware lands. */
   const applyReading = useCallback((next: SensorReading) => {
     setReading(next);
     if (settle.current) clearTimeout(settle.current);
@@ -63,7 +71,7 @@ function Dashboard() {
       setReasoning(explain(prevRef.current, next));
       setStamp((s) => s + 1);
       prevRef.current = next;
-    }, 550);
+    }, 520);
   }, []);
 
   const onChange = useCallback(
@@ -71,7 +79,6 @@ function Dashboard() {
     [reading, applyReading],
   );
 
-  // rolling telemetry
   useEffect(() => {
     const id = setInterval(() => {
       setHistory((h) => [...h.slice(-119), { t: Date.now(), score: healthScore(reading), ...reading }]);
@@ -82,79 +89,101 @@ function Dashboard() {
   const recs = useMemo(() => recommend(reading), [reading]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-deep">
-      <div className="pointer-events-none fixed inset-0 opacity-60">
-        <div className="absolute left-1/4 top-[-10%] h-[520px] w-[520px] rounded-full bg-signal/10 blur-[140px]" />
-        <div className="absolute right-[-5%] top-1/3 h-[420px] w-[420px] rounded-full bg-excellent/10 blur-[140px]" />
-      </div>
+    <main className="min-h-screen bg-deep">
+      {/* device header */}
+      <header className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-6 md:px-10">
+        <div className="flex items-baseline gap-3">
+          <span className="font-display text-[15px] tracking-[0.34em] text-foreground">WHI</span>
+          <span className="hidden text-xs text-muted-foreground sm:inline">
+            Workspace Health Intelligence
+          </span>
+        </div>
+        <span className="mono-num flex items-center gap-2 text-[11px] text-muted-foreground">
+          <span
+            className="h-1.5 w-1.5 animate-breath rounded-full"
+            style={{ background: tone.color }}
+          />
+          Sensing
+        </span>
+      </header>
 
-      <div className="relative mx-auto max-w-[1280px] px-5 pb-24 pt-8 md:px-8">
-        {/* header */}
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-signal/15 text-signal">
-              <Activity className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-sm font-bold tracking-[0.16em] text-foreground">WHI</p>
-              <p className="text-[11px] text-muted-foreground">Workspace Health Intelligence</p>
-            </div>
-          </div>
-          <div className="mono-num flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-4 py-1.5 text-[11px] text-muted-foreground backdrop-blur">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-excellent" />
-            Sensors → NodeMCU → Firebase · simulated feed active
-          </div>
-        </header>
+      {/* ACT ONE — the room */}
+      <section className="mx-auto max-w-[1240px] px-6 pt-6 md:px-10 md:pt-10">
+        <h1 className="max-w-[16ch] text-[42px] leading-[0.98] md:text-[76px]">
+          Your desk is
+          <span className="block" style={{ color: tone.color, transition: "color 900ms ease" }}>
+            {status.toLowerCase()}.
+          </span>
+        </h1>
 
-        {/* hero */}
-        <section className="mt-10 grid items-center gap-8 lg:grid-cols-[minmax(0,420px)_1fr]">
-          <div>
-            <h1 className="text-[40px] font-semibold leading-[1.05] md:text-[52px]">
-              Your desk has a
-              <span className="block text-signal">health score.</span>
-            </h1>
-            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              WHI watches screen distance, light, temperature and humidity — then tells you{" "}
-              <span className="text-foreground">why</span> your workspace health moved and what to fix
-              next. Drag any slider below and watch the twin react.
-            </p>
-            <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-              <ChevronDown className="h-4 w-4 animate-bounce text-signal" />
-              Live reasoning updates in under a second
-            </div>
-            <div className="mt-8 lg:hidden">
-              <ScoreOrb score={score} reading={reading} />
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
-            <div className="hidden lg:block">
-              <ScoreOrb score={score} reading={reading} />
-            </div>
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_300px] lg:items-end">
+          <div className="animate-fade">
             <WorkspaceScene reading={reading} />
           </div>
-        </section>
 
-        {/* controls + reasoning */}
-        <section className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,440px)_1fr]">
-          <SimulationPanel reading={reading} onChange={onChange} onPreset={applyReading} />
-          <ReasoningPanel reasoning={reasoning} reading={reading} stamp={stamp} />
-        </section>
+          <div className="lg:pb-2">
+            <span className="label-eyebrow">Workspace health</span>
+            <div className="mt-3 flex items-end gap-2">
+              <span
+                className="display-num text-[104px] md:text-[132px]"
+                style={{ color: tone.color, transition: "color 900ms ease" }}
+              >
+                {Math.round(smooth)}
+              </span>
+              <span className="mono-num pb-4 text-sm text-muted-foreground">/100</span>
+            </div>
+            <p className="mt-5 max-w-[36ch] text-[15px] leading-relaxed text-muted-foreground">
+              Everything in the scene above is a live sensor. Move a control and the room dims,
+              warms, thickens or shifts — and the score follows for a reason you can read.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <section className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,440px)_1fr]">
+      {/* ACT TWO — the controls and the explanation */}
+      <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
+        <div className="hairline-t grid gap-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-24">
+          <ControlDeck reading={reading} onChange={onChange} onPreset={applyReading} />
+          <Narrative reasoning={reasoning} reading={reading} stamp={stamp} />
+        </div>
+      </section>
+
+      {/* ACT THREE — guidance */}
+      <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
+        <div className="hairline-t pt-12">
+          <Guidance items={recs} />
+        </div>
+      </section>
+
+      {/* ACT FOUR — rest */}
+      <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
+        <div className="hairline-t grid gap-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-24">
           <BreakTimer onBreakComplete={() => setBreaks((b) => b + 1)} />
-          <Recommendations items={recs} />
-        </section>
+          <div>
+            <span className="label-eyebrow">Session</span>
+            <h2 className="mt-4 max-w-[20ch] text-[30px] leading-[1.12] md:text-[40px]">
+              A record builds quietly while you work.
+            </h2>
+            <p className="mt-5 max-w-[46ch] text-sm leading-relaxed text-muted-foreground">
+              WHI samples your environment continuously. The history below is the same reading
+              stream the hardware pipeline will produce — sensors, NodeMCU, cloud, screen.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <div className="mt-8">
+      {/* ACT FIVE — history, deliberately last */}
+      <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
+        <div className="hairline-t pt-12">
           <Analytics history={history} reading={reading} breaks={breaks} startedAt={startedAt.current} />
         </div>
+      </section>
 
-        <footer className="mt-14 border-t border-border/50 pt-6 text-xs text-muted-foreground">
-          Prototype · simulated sensor inputs. The reading contract is hardware-ready — swap the
-          simulator for the Firebase stream and the entire intelligence layer keeps working.
-        </footer>
-      </div>
+      <footer className="mx-auto mt-24 max-w-[1240px] px-6 pb-16 md:px-10">
+        <div className="hairline-t pt-6 text-xs text-muted-foreground">
+          Prototype · simulated sensor inputs. The reading contract is hardware-ready.
+        </div>
+      </footer>
     </main>
   );
 }
