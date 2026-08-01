@@ -1,12 +1,44 @@
-import { metrics, subScore, zoneOf, type SensorReading } from "@/lib/whi";
+import { metrics, subScore, zoneOf, type MetricKey, type SensorReading } from "@/lib/whi";
+
+/** A camera framing expressed in scene coordinates (scene is 1200x620). */
+export type Camera = { x: number; y: number; w: number };
+
+export const wideShot: Camera = { x: 0, y: 0, w: 1200 };
 
 /**
  * Side-elevation view of the actual desk. Everything you see is a sensor:
  * distance moves the person, light sets the exposure of the whole room,
  * temperature tints the air, humidity thickens it.
+ *
+ * `camera` dollies and zooms the whole room; `focus` fades everything that is
+ * not the subject of the current chapter so the object being explained leads.
  */
-export function WorkspaceScene({ reading }: { reading: SensorReading }) {
+export function WorkspaceScene({
+  reading,
+  camera = wideShot,
+  focus = null,
+  showReadouts = true,
+  cover = false,
+}: {
+  reading: SensorReading;
+  camera?: Camera;
+  focus?: MetricKey | null;
+  showReadouts?: boolean;
+  /** Fill the parent like a background plate instead of fitting inside it. */
+  cover?: boolean;
+}) {
   const { distance, light, temperature, humidity } = reading;
+
+  const zoom = 1200 / camera.w;
+  const camStyle = {
+    transform: `scale(${zoom.toFixed(4)}) translate(${(-camera.x).toFixed(1)}px, ${(-camera.y).toFixed(1)}px)`,
+    transformOrigin: "0 0",
+    transition: "transform 1400ms cubic-bezier(.65,0,.2,1)",
+  } as const;
+
+  /** Opacity for a group that is not the current subject. */
+  const sub = (...keys: MetricKey[]) =>
+    !focus || keys.includes(focus) ? 1 : 0.28;
 
   const screenX = 828;
   const personX = screenX - distance * 4.7;
@@ -31,8 +63,20 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
   const ease = "1100ms cubic-bezier(.22,1,.36,1)";
 
   return (
-    <div className="relative isolate w-full overflow-hidden rounded-[28px] bg-deep">
-      <svg viewBox="0 0 1200 620" className="block h-full w-full" role="img" aria-label="Live side view of your workspace">
+    <div
+      className={
+        cover
+          ? "absolute inset-0 isolate overflow-hidden bg-deep"
+          : "relative isolate w-full overflow-hidden rounded-[28px] bg-deep"
+      }
+    >
+      <svg
+        viewBox="0 0 1200 620"
+        preserveAspectRatio={cover ? "xMidYMid slice" : "xMidYMid meet"}
+        className="block h-full w-full"
+        role="img"
+        aria-label="Live side view of your workspace"
+      >
         <defs>
           <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="oklch(0.30 0.008 62)" />
@@ -60,6 +104,9 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
           </radialGradient>
         </defs>
 
+        <g style={camStyle}>
+
+
         {/* room */}
         <g style={{ opacity: 0.25 + exposure * 0.75, transition: `opacity ${ease}` }}>
           <rect x="0" y="0" width="1200" height="470" fill="url(#wall)" />
@@ -68,7 +115,8 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
         </g>
 
         {/* window — the ambient light source */}
-        <g>
+        <g style={{ opacity: sub("light"), transition: "opacity 900ms ease" }}>
+
           <rect
             x="70"
             y="86"
@@ -89,7 +137,8 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
         </g>
 
         {/* desk lamp */}
-        <g>
+        <g style={{ opacity: sub("light"), transition: "opacity 900ms ease" }}>
+
           <line x1="920" y1="470" x2="920" y2="196" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
           <line x1="920" y1="196" x2="836" y2="168" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
           <path d="M812 154 L862 172 L840 200 L800 182 Z" fill="oklch(0.42 0.01 62)" />
@@ -135,7 +184,14 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
         <rect x="660" y="450" width="128" height="8" rx="3" fill="oklch(0.3 0.01 62)" />
 
         {/* person silhouette — moves with measured distance */}
-        <g style={{ transform: `translateX(${(personX - 30).toFixed(1)}px)`, transition: `transform ${ease}` }}>
+        <g
+          style={{
+            transform: `translateX(${(personX - 30).toFixed(1)}px)`,
+            opacity: sub("distance"),
+            transition: `transform ${ease}, opacity 900ms ease`,
+          }}
+        >
+
           <g fill="oklch(0.1 0.006 62)">
             {/* chair */}
             <rect x="-118" y="300" width="16" height="170" rx="6" fill="oklch(0.2 0.008 62)" />
@@ -150,7 +206,7 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
         </g>
 
         {/* measurement between eye and screen */}
-        <g style={{ transition: `all ${ease}` }}>
+        <g style={{ opacity: sub("distance"), transition: `all ${ease}` }}>
           <line
             x1={personX + 60}
             y1={eyeY - 4}
@@ -218,10 +274,13 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
           fill="var(--deep)"
           style={{ opacity: Math.max(0, 0.86 - exposure * 0.88), transition: `opacity ${ease}` }}
         />
+        </g>
       </svg>
 
       {/* corner readouts, instrument-panel style */}
+      {showReadouts && (
       <div className="pointer-events-none flex flex-wrap items-center gap-x-8 gap-y-2 px-5 pb-5 pt-4 md:absolute md:inset-x-0 md:bottom-0 md:px-8 md:pt-16">
+
         {(["light", "temperature", "humidity"] as const).map((k) => (
           <div key={k} className="flex items-baseline gap-2">
             <span className="label-eyebrow">{metrics[k].label}</span>
@@ -233,6 +292,8 @@ export function WorkspaceScene({ reading }: { reading: SensorReading }) {
           </div>
         ))}
       </div>
+      )}
+
     </div>
   );
 }
