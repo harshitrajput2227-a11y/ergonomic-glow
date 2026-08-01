@@ -142,7 +142,7 @@ export function ScrollStory({ onChapter }: { onChapter: (r: SensorReading) => vo
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, color-mix(in oklab, var(--deep) 70%, transparent) 0%, transparent 24%, transparent 44%, color-mix(in oklab, var(--deep) 90%, transparent) 100%), linear-gradient(270deg, color-mix(in oklab, var(--deep) 88%, transparent) 0%, color-mix(in oklab, var(--deep) 60%, transparent) 34%, transparent 58%)",
+              "linear-gradient(180deg, color-mix(in oklab, var(--deep) 70%, transparent) 0%, transparent 24%, transparent 44%, color-mix(in oklab, var(--deep) 90%, transparent) 100%), linear-gradient(270deg, color-mix(in oklab, var(--deep) 88%, transparent) 0%, color-mix(in oklab, var(--deep) 74%, transparent) 42%, transparent 72%)",
           }}
         />
 
