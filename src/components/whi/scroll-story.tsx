@@ -127,7 +127,7 @@ export function ScrollStory({ onChapter }: { onChapter: (r: SensorReading) => vo
       {/* the stage — one continuous camera on one room */}
       <div className="pointer-events-none sticky top-0 flex h-svh items-center overflow-hidden bg-deep">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full">
+          <div className="w-full scale-[1.75] md:scale-100">
             <WorkspaceScene
               reading={chapter.reading}
               camera={chapter.camera}
