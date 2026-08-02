@@ -1,4 +1,7 @@
+import type { ReactNode } from "react";
+
 import { metrics, subScore, zoneOf, type MetricKey, type SensorReading } from "@/lib/whi";
+import { defaultSetup, type WorkspaceSetup } from "@/lib/whi-profile";
 
 /** A camera framing expressed in scene coordinates (scene is 1200x620). */
 export type Camera = { x: number; y: number; w: number };
