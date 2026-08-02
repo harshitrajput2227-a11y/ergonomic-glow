@@ -202,7 +202,7 @@ function SetupPage() {
                 </span>
                 <span className="text-[17px] text-foreground">{r.title}</span>
                 <span className="mono-num pt-1 text-sm text-muted-foreground">
-                  priority {Math.round((profile.priority[r.key as never] ?? 1) * 100)}%
+                  priority {Math.round(((profile.priority as Record<string, number>)[r.key] ?? 1) * 100)}%
                 </span>
               </li>
             ))}
