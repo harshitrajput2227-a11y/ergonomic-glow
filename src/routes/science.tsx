@@ -213,7 +213,7 @@ function SciencePage() {
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            const idx = Number((e.target as HTMLElement).dataset.idx);
+            const idx = Number((e.target as HTMLElement).dataset['idx']);
             if (!Number.isNaN(idx)) setI(idx);
           }
         }
