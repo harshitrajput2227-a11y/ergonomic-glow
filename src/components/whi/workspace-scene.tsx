@@ -141,7 +141,7 @@ export function WorkspaceScene({
             height="250"
             rx="6"
             fill="oklch(0.96 0.05 82)"
-            style={{ opacity: 0.06 + exposure * 0.72, transition: `opacity ${ease}` }}
+            style={{ opacity: (0.06 + exposure * 0.72) * windowGain, transition: `opacity ${ease}` }}
           />
           <rect x="70" y="86" width="212" height="250" rx="6" fill="none" stroke="oklch(0.99 0 0 / 16%)" />
           <line x1="176" y1="86" x2="176" y2="336" stroke="oklch(0.15 0 0 / 55%)" strokeWidth="4" />
@@ -149,7 +149,7 @@ export function WorkspaceScene({
           <polygon
             points="282,110 700,470 282,470"
             fill="url(#windowLight)"
-            style={{ opacity: 0.06 + exposure * 0.5, transition: `opacity ${ease}` }}
+            style={{ opacity: (0.06 + exposure * 0.5) * windowGain, transition: `opacity ${ease}` }}
           />
         </g>
 
