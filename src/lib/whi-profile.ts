@@ -88,7 +88,7 @@ export const defaultSetup: WorkspaceSetup = {
   monitors: "single",
   desk: "sitting",
   lighting: "mixed",
-  style: "balanced";
+  style: "balanced",
 };
 
 export const styleMinutes: Record<WorkStyle, number> = {
