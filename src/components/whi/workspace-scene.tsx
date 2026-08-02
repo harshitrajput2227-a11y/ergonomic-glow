@@ -332,6 +332,7 @@ export function WorkspaceScene({
           fill="var(--deep)"
           style={{ opacity: Math.max(0, 0.86 - exposure * 0.88), transition: `opacity ${ease}` }}
         />
+        {overlay}
         </g>
       </svg>
 
