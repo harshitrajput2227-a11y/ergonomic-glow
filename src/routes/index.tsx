@@ -91,25 +91,13 @@ function Dashboard() {
 
   return (
     <main className="bg-deep">
-      {/* device header — floats over the stage */}
-      <header className="fixed inset-x-0 top-0 z-30">
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-6 md:px-10">
-          <div className="flex items-baseline gap-3">
-            <span className="font-display text-[15px] tracking-[0.34em] text-foreground">WHI</span>
-            <span className="hidden text-xs text-muted-foreground sm:inline">
-              Workspace Health Intelligence
-            </span>
-          </div>
-          <span className="mono-num flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 animate-breath rounded-full" style={{ background: tone.color }} />
-            Sensing
-          </span>
-        </div>
-      </header>
-
       {/* OPENING — one line, then the room takes over */}
       <section className="relative flex h-svh items-end">
         <div className="mx-auto w-full max-w-[1240px] px-6 pb-16 md:px-10 md:pb-24">
+          <span className="mono-num mb-6 flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 animate-breath rounded-full" style={{ background: tone.color }} />
+            Sensing · {profile.label} profile
+          </span>
           <h1 className="max-w-[18ch] text-[46px] leading-[0.98] md:text-[84px]">
             Your workspace has been
             <span className="block text-muted-foreground">telling you something.</span>
