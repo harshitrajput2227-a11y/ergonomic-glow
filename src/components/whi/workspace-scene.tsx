@@ -19,6 +19,8 @@ export function WorkspaceScene({
   focus = null,
   showReadouts = true,
   cover = false,
+  setup = defaultSetup,
+  overlay,
 }: {
   reading: SensorReading;
   camera?: Camera;
@@ -26,6 +28,10 @@ export function WorkspaceScene({
   showReadouts?: boolean;
   /** Fill the parent like a background plate instead of fitting inside it. */
   cover?: boolean;
+  /** Physical configuration of the desk — changes what is actually built. */
+  setup?: WorkspaceSetup;
+  /** Extra SVG drawn in scene coordinates on top of the room. */
+  overlay?: ReactNode;
 }) {
   const { distance, light, temperature, humidity } = reading;
 
@@ -40,13 +46,18 @@ export function WorkspaceScene({
   const sub = (...keys: MetricKey[]) =>
     !focus || keys.includes(focus) ? 1 : 0.28;
 
+  /** Standing desks lift the whole work surface — everything on it follows. */
+  const lift = setup.desk === "standing" ? -74 : 0;
   const screenX = 828;
   const personX = screenX - distance * 4.7;
-  const eyeY = 274;
+  const eyeY = 274 + lift;
+
+  const lampGain = setup.lighting === "lamp" ? 1.35 : setup.lighting === "daylight" ? 0.25 : 1;
+  const windowGain = setup.lighting === "daylight" ? 1.35 : setup.lighting === "lamp" ? 0.35 : 1;
 
   const lux = Math.min(light, 1000);
   const exposure = 0.14 + Math.pow(lux / 1000, 0.62) * 0.86; // 0..1
-  const glare = Math.max(0, (light - 640) / 360);
+  const glare = Math.max(0, (light - 640) / 360) * windowGain;
   const warm = Math.max(-1, Math.min(1, (temperature - 22.5) / 8)); // -1 cold .. 1 hot
   const haze = Math.max(0, Math.min(1, (humidity - 52) / 38));
   const dry = Math.max(0, Math.min(1, (42 - humidity) / 32));
@@ -61,6 +72,9 @@ export function WorkspaceScene({
     distScore > 82 ? "var(--state-excellent)" : distScore > 55 ? "var(--state-warn)" : "var(--state-poor)";
 
   const ease = "1100ms cubic-bezier(.22,1,.36,1)";
+
+  /** Screen height in the side elevation: ultrawide is lower and longer. */
+  const screenH = setup.monitors === "ultrawide" ? 132 : 166;
 
   return (
     <div
