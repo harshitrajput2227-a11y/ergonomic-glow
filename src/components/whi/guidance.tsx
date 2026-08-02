@@ -1,13 +1,17 @@
 import type { Recommendation } from "@/lib/whi";
 
 /** Ranked guidance as an editorial list — numbered, quiet, no card chrome. */
-export function Guidance({ items }: { items: Recommendation[] }) {
+export function Guidance({ items, note }: { items: Recommendation[]; note?: string }) {
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="label-eyebrow">What to do next</span>
         <span className="text-xs text-muted-foreground">Ranked by points recoverable</span>
       </div>
+
+      {note && (
+        <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-signal/90">{note}</p>
+      )}
 
       <ol className="mt-6 divide-y divide-border">
         {items.map((r, i) => {

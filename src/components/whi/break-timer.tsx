@@ -1,13 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 
-const FOCUS = 20 * 60;
 const REST = 20;
 
 /** 20-20-20 rule, rendered like a device timer rather than a widget. */
-export function BreakTimer({ onBreakComplete }: { onBreakComplete: () => void }) {
+export function BreakTimer({
+  onBreakComplete,
+  focusMinutes = 20,
+}: {
+  onBreakComplete: () => void;
+  /** Focus block length, set by the personalization profile + work style. */
+  focusMinutes?: number;
+}) {
+  const FOCUS = Math.round(focusMinutes * 60);
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState<"focus" | "rest">("focus");
   const [left, setLeft] = useState(FOCUS);
+
+  // A profile change resets the block so the readout never lies.
+  useEffect(() => {
+    setRunning(false);
+    setPhase("focus");
+    setLeft(FOCUS);
+  }, [FOCUS]);
   const done = useRef(onBreakComplete);
   done.current = onBreakComplete;
 
@@ -26,7 +40,7 @@ export function BreakTimer({ onBreakComplete }: { onBreakComplete: () => void })
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [running, phase]);
+  }, [running, phase, FOCUS]);
 
   const total = phase === "focus" ? FOCUS : REST;
   const progress = 1 - left / total;
@@ -38,7 +52,7 @@ export function BreakTimer({ onBreakComplete }: { onBreakComplete: () => void })
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="label-eyebrow">20 · 20 · 20</span>
         <span className="text-xs text-muted-foreground">
-          {phase === "focus" ? "Focus block" : "Look 20 feet away"}
+          {phase === "focus" ? `${focusMinutes}-minute focus block` : "Look 20 feet away"}
         </span>
       </div>
 

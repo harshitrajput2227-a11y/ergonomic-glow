@@ -9,6 +9,8 @@ import { Guidance } from "@/components/whi/guidance";
 import { BreakTimer } from "@/components/whi/break-timer";
 import { Analytics, type HistoryPoint } from "@/components/whi/analytics";
 import { useSmoothNumber } from "@/lib/use-smooth-number";
+import { useWorkspaceConfig } from "@/lib/workspace-config";
+import { focusLength, personalize } from "@/lib/whi-profile";
 import {
   defaultReading,
   explain,
@@ -44,6 +46,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
+  const { profile, setup } = useWorkspaceConfig();
   const [reading, setReading] = useState<SensorReading>(defaultReading);
   const prevRef = useRef<SensorReading>(defaultReading);
   const [reasoning, setReasoning] = useState<Reasoning>(() => explain(defaultReading, defaultReading));
@@ -87,29 +90,17 @@ function Dashboard() {
     return () => clearInterval(id);
   }, [reading]);
 
-  const recs = useMemo(() => recommend(reading), [reading]);
+  const recs = useMemo(() => personalize(recommend(reading), profile), [reading, profile]);
 
   return (
     <main className="bg-deep">
-      {/* device header — floats over the stage */}
-      <header className="fixed inset-x-0 top-0 z-30">
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-6 md:px-10">
-          <div className="flex items-baseline gap-3">
-            <span className="font-display text-[15px] tracking-[0.34em] text-foreground">WHI</span>
-            <span className="hidden text-xs text-muted-foreground sm:inline">
-              Workspace Health Intelligence
-            </span>
-          </div>
-          <span className="mono-num flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="h-1.5 w-1.5 animate-breath rounded-full" style={{ background: tone.color }} />
-            Sensing
-          </span>
-        </div>
-      </header>
-
       {/* OPENING — one line, then the room takes over */}
       <section className="relative flex h-svh items-end">
         <div className="mx-auto w-full max-w-[1240px] px-6 pb-16 md:px-10 md:pb-24">
+          <span className="mono-num mb-6 flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="h-1.5 w-1.5 animate-breath rounded-full" style={{ background: tone.color }} />
+            Sensing · {profile.label} profile
+          </span>
           <h1 className="max-w-[18ch] text-[46px] leading-[0.98] md:text-[84px]">
             Your workspace has been
             <span className="block text-muted-foreground">telling you something.</span>
@@ -134,7 +125,7 @@ function Dashboard() {
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_300px] lg:items-end">
           <div className="animate-fade">
-            <WorkspaceScene reading={reading} />
+            <WorkspaceScene reading={reading} setup={setup} />
           </div>
           <div className="lg:pb-2">
             <span className="label-eyebrow">Workspace health</span>
@@ -161,13 +152,16 @@ function Dashboard() {
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
         <div className="hairline-t pt-12">
-          <Guidance items={recs} />
+          <Guidance items={recs} note={profile.voice} />
         </div>
       </section>
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
         <div className="hairline-t grid gap-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-24">
-          <BreakTimer onBreakComplete={() => setBreaks((b) => b + 1)} />
+          <BreakTimer
+            focusMinutes={focusLength(profile, setup)}
+            onBreakComplete={() => setBreaks((b) => b + 1)}
+          />
           <div>
             <span className="label-eyebrow">Session</span>
             <h2 className="mt-4 max-w-[20ch] text-[30px] leading-[1.12] md:text-[40px]">
