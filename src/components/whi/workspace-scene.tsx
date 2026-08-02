@@ -156,37 +156,67 @@ export function WorkspaceScene({
         {/* desk lamp */}
         <g style={{ opacity: sub("light"), transition: "opacity 900ms ease" }}>
 
-          <line x1="920" y1="470" x2="920" y2="196" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
-          <line x1="920" y1="196" x2="836" y2="168" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
-          <path d="M812 154 L862 172 L840 200 L800 182 Z" fill="oklch(0.42 0.01 62)" />
+          <g style={{ transform: `translateY(${lift}px)`, transition: `transform ${ease}` }}>
+            <line x1="920" y1={470 - lift} x2="920" y2="196" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
+            <line x1="920" y1="196" x2="836" y2="168" stroke="oklch(0.55 0.01 62)" strokeWidth="5" strokeLinecap="round" />
+            <path d="M812 154 L862 172 L840 200 L800 182 Z" fill="oklch(0.42 0.01 62)" />
+          </g>
           <polygon
-            points="806,190 848,204 940,470 690,470"
+            points={`806,${190 + lift} 848,${204 + lift} 940,470 690,470`}
             fill="url(#lampCone)"
-            style={{ opacity: 0.1 + exposure * 0.55, transition: `opacity ${ease}` }}
+            style={{ opacity: (0.1 + exposure * 0.55) * lampGain, transition: `opacity ${ease}` }}
           />
         </g>
 
-        {/* desk */}
-        <g>
+        {/* desk — rises for a standing setup */}
+        <g style={{ transform: `translateY(${lift}px)`, transition: `transform ${ease}` }}>
           <rect x="560" y="456" width="560" height="16" rx="4" fill="oklch(0.34 0.014 64)" />
           <rect x="560" y="456" width="560" height="4" rx="2" fill="oklch(0.62 0.02 66)" opacity="0.5" />
-          <rect x="1084" y="472" width="14" height="148" fill="oklch(0.24 0.01 62)" />
-          <rect x="586" y="472" width="14" height="148" fill="oklch(0.24 0.01 62)" />
+          <rect x="1084" y="472" width="14" height={148 - lift} fill="oklch(0.24 0.01 62)" />
+          <rect x="586" y="472" width="14" height={148 - lift} fill="oklch(0.24 0.01 62)" />
         </g>
 
-        {/* monitor */}
-        <g>
+        {/* monitor(s) — configuration is physically built, not labelled */}
+        <g style={{ transform: `translateY(${lift}px)`, transition: `transform ${ease}` }}>
           <rect x="828" y="472" width="150" height="10" rx="5" fill="oklch(0.3 0.01 62)" />
           <rect x="890" y="392" width="18" height="82" fill="oklch(0.3 0.01 62)" />
-          <rect x="820" y="232" width="14" height="166" rx="6" fill="oklch(0.28 0.01 62)" />
+          <rect
+            x="820"
+            y={398 - screenH}
+            width="14"
+            height={screenH}
+            rx="6"
+            fill="oklch(0.28 0.01 62)"
+            style={{ transition: `all ${ease}` }}
+          />
           <rect
             x="834"
-            y="236"
+            y={402 - screenH}
             width="8"
-            height="158"
+            height={screenH - 8}
             fill="url(#screenFace)"
-            style={{ opacity: 0.55 + exposure * 0.25, transition: `opacity ${ease}` }}
+            style={{ opacity: 0.55 + exposure * 0.25, transition: `all ${ease}` }}
           />
+          {/* second display, angled behind the primary */}
+          <g
+            style={{
+              opacity: setup.monitors === "dual" ? 1 : 0,
+              transition: `opacity ${ease}`,
+            }}
+          >
+            <rect x="1000" y="472" width="110" height="9" rx="4" fill="oklch(0.3 0.01 62)" />
+            <rect x="1046" y="410" width="14" height="64" fill="oklch(0.3 0.01 62)" />
+            <rect x="1024" y="266" width="12" height="146" rx="6" fill="oklch(0.26 0.01 62)" transform="rotate(7 1030 340)" />
+            <rect
+              x="1036"
+              y="272"
+              width="7"
+              height="134"
+              fill="url(#screenFace)"
+              transform="rotate(7 1040 340)"
+              style={{ opacity: 0.45 + exposure * 0.25, transition: `opacity ${ease}` }}
+            />
+          </g>
           <ellipse
             cx="770"
             cy="315"
@@ -198,29 +228,40 @@ export function WorkspaceScene({
         </g>
 
         {/* keyboard */}
-        <rect x="660" y="450" width="128" height="8" rx="3" fill="oklch(0.3 0.01 62)" />
+        <rect
+          x="660"
+          y={450 + lift}
+          width="128"
+          height="8"
+          rx="3"
+          fill="oklch(0.3 0.01 62)"
+          style={{ transition: `all ${ease}` }}
+        />
 
         {/* person silhouette — moves with measured distance */}
         <g
           style={{
-            transform: `translateX(${(personX - 30).toFixed(1)}px)`,
+            transform: `translate(${(personX - 30).toFixed(1)}px, ${lift}px)`,
             opacity: sub("distance"),
             transition: `transform ${ease}, opacity 900ms ease`,
           }}
         >
 
           <g fill="oklch(0.1 0.006 62)">
-            {/* chair */}
-            <rect x="-118" y="300" width="16" height="170" rx="6" fill="oklch(0.2 0.008 62)" />
-            <rect x="-104" y="452" width="86" height="14" rx="6" fill="oklch(0.2 0.008 62)" />
+            {/* chair — absent when standing */}
+            <g style={{ opacity: setup.desk === "standing" ? 0 : 1, transition: `opacity ${ease}` }}>
+              <rect x="-118" y="300" width="16" height="170" rx="6" fill="oklch(0.2 0.008 62)" />
+              <rect x="-104" y="452" width="86" height="14" rx="6" fill="oklch(0.2 0.008 62)" />
+            </g>
             {/* torso + head */}
-            <path d="M-30 470 C -34 400, -22 340, 10 316 L 46 316 C 62 352, 60 420, 52 470 Z" />
+            <path d={`M-30 ${470 - lift} C -34 400, -22 340, 10 316 L 46 316 C 62 352, 60 420, 52 ${470 - lift} Z`} />
             <circle cx="34" cy="274" r="30" />
             <path d="M46 322 C 78 330, 108 372, 126 430 L 106 442 C 88 396, 66 364, 42 352 Z" />
           </g>
           {/* eye level marker */}
-          <circle cx="52" cy={eyeY - 4} r="3.5" fill={distTone} style={{ transition: `fill ${ease}` }} />
+          <circle cx="52" cy="270" r="3.5" fill={distTone} style={{ transition: `fill ${ease}` }} />
         </g>
+
 
         {/* measurement between eye and screen */}
         <g style={{ opacity: sub("distance"), transition: `all ${ease}` }}>
