@@ -1,19 +1,22 @@
 import type { Recommendation } from "@/lib/whi";
 
 /** Ranked guidance as an editorial list — numbered, quiet, no card chrome. */
-export function Guidance({ items, note }: { items: Recommendation[]; note?: string }) {
+export function Guidance({ items, note, stamp = 0 }: { items: Recommendation[]; note?: string; stamp?: number }) {
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="label-eyebrow">What to do next</span>
-        <span className="text-xs text-muted-foreground">Ranked by points recoverable</span>
+        <span className="text-xs text-muted-foreground">
+          Ranked by points recoverable · each line traced to its sensor
+        </span>
       </div>
+
 
       {note && (
         <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-signal/90">{note}</p>
       )}
 
-      <ol className="mt-6 divide-y divide-border">
+      <ol key={stamp} className="mt-6 divide-y divide-border">
         {items.map((r, i) => {
           const tone =
             r.severity === "critical"
@@ -40,6 +43,9 @@ export function Guidance({ items, note }: { items: Recommendation[]; note?: stri
                 </div>
                 <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-muted-foreground">
                   {r.body}
+                </p>
+                <p className="mono-num mt-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+                  Source · {r.sensor}
                 </p>
               </div>
               <span className="mono-num pt-1 text-sm" style={{ color: r.impact > 0 ? tone : "var(--muted-foreground)" }}>

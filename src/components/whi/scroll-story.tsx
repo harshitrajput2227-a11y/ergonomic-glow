@@ -43,7 +43,7 @@ const chapters: Chapter[] = [
     id: "ergonomics",
     eyebrow: "02 · Ergonomics",
     title: "The screen moves closer than you notice.",
-    body: "An ultrasonic sensor tracks eye-to-screen distance in real time. At 38 cm your eyes hold a near-focus posture for hours — the single largest contributor to end-of-day fatigue.",
+    body: "An ultrasonic sensor tracks eye-to-screen distance in real time. At 38 cm the reading sits well below the recommended 55–75 cm range, and sustained near-focus viewing is the single largest contributor to end-of-day eye fatigue.",
     camera: { x: 430, y: 140, w: 780 },
     focus: "distance",
     reading: { ...defaultReading, distance: 38 },
@@ -75,6 +75,15 @@ const chapters: Chapter[] = [
     focus: null,
     reading: ideal,
     mode: "score",
+  },
+  {
+    id: "arrival",
+    eyebrow: "06 · Arrival",
+    title: "Now you are sitting at it.",
+    body: "The camera stops where you work. From here the room stops being a story and becomes the instrument — every control below moves this same desk.",
+    camera: { x: 300, y: 96, w: 860 },
+    focus: null,
+    reading: ideal,
   },
 ];
 

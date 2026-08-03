@@ -8,7 +8,9 @@ import { Narrative } from "@/components/whi/narrative";
 import { Guidance } from "@/components/whi/guidance";
 import { BreakTimer } from "@/components/whi/break-timer";
 import { Analytics, type HistoryPoint } from "@/components/whi/analytics";
-import { useSmoothNumber } from "@/lib/use-smooth-number";
+import { DataFlow } from "@/components/whi/data-flow";
+import { HardwareStatus } from "@/components/whi/hardware-status";
+import { ScoreRing } from "@/components/whi/score-ring";
 import { useWorkspaceConfig } from "@/lib/workspace-config";
 import { focusLength, personalize } from "@/lib/whi-profile";
 import {
@@ -22,6 +24,7 @@ import {
   type Reasoning,
   type SensorReading,
 } from "@/lib/whi";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -57,13 +60,15 @@ function Dashboard() {
   const [breaks, setBreaks] = useState(0);
   const startedAt = useRef(0);
   const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** How long viewing distance has stayed below the recommended band. */
+  const closeSince = useRef<number | null>(null);
+  const [sustainedCloseMs, setSustainedCloseMs] = useState(0);
 
   useEffect(() => {
     startedAt.current = Date.now();
   }, []);
 
   const score = healthScore(reading);
-  const smooth = useSmoothNumber(score, 0.1);
   const status = statusOf(score);
   const tone = statusTone(status);
 
@@ -86,11 +91,30 @@ function Dashboard() {
   useEffect(() => {
     const id = setInterval(() => {
       setHistory((h) => [...h.slice(-119), { t: Date.now(), score: healthScore(reading), ...reading }]);
+      if (reading.distance < 55) {
+        closeSince.current ??= Date.now();
+        setSustainedCloseMs(Date.now() - closeSince.current);
+      } else {
+        closeSince.current = null;
+        setSustainedCloseMs(0);
+      }
     }, 3000);
     return () => clearInterval(id);
   }, [reading]);
 
-  const recs = useMemo(() => personalize(recommend(reading), profile), [reading, profile]);
+  const recs = useMemo(
+    () => personalize(recommend(reading, sustainedCloseMs), profile),
+    [reading, sustainedCloseMs, profile],
+  );
+
+  /** Subtle dolly: the tighter the viewing distance, the closer the camera sits. */
+  const closeness = Math.max(0, Math.min(1, (72 - reading.distance) / 40));
+  const camera = {
+    x: Math.round(70 * closeness),
+    y: Math.round(34 * closeness),
+    w: Math.round(1200 - 150 * closeness),
+  };
+
 
   return (
     <main className="bg-deep">
@@ -117,7 +141,7 @@ function Dashboard() {
       <ScrollStory onChapter={applyReading} />
 
       {/* HANDOVER — the room becomes yours to drive */}
-      <section className="mx-auto max-w-[1240px] px-6 pt-28 md:px-10 md:pt-40">
+      <section className="mx-auto max-w-[1240px] px-6 pt-24 md:px-10 md:pt-32">
         <span className="label-eyebrow">Now you drive it</span>
         <h2 className="mt-4 max-w-[20ch] text-[34px] leading-[1.05] md:text-[52px]">
           Take the controls and watch the room answer.
@@ -125,20 +149,19 @@ function Dashboard() {
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_300px] lg:items-end">
           <div className="animate-fade">
-            <WorkspaceScene reading={reading} setup={setup} />
+            <WorkspaceScene reading={reading} setup={setup} camera={camera} />
           </div>
           <div className="lg:pb-2">
             <span className="label-eyebrow">Workspace health</span>
-            <div className="mt-3 flex items-end gap-2">
-              <span
-                className="display-num text-[96px] md:text-[124px]"
-                style={{ color: tone.color, transition: "color 900ms ease" }}
-              >
-                {Math.round(smooth)}
-              </span>
-              <span className="mono-num pb-4 text-sm text-muted-foreground">/100</span>
+            <div className="mt-4">
+              <ScoreRing score={score} />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">{status}</p>
+            <p className="mt-4 text-sm" style={{ color: tone.color, transition: "color 900ms ease" }}>
+              {status}
+            </p>
+            <div className="mt-8">
+              <DataFlow stamp={stamp} label={`${score} pts committed`} />
+            </div>
           </div>
         </div>
       </section>
@@ -151,9 +174,11 @@ function Dashboard() {
       </section>
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
-        <div className="hairline-t pt-12">
-          <Guidance items={recs} note={profile.voice} />
+        <div className="hairline-t grid gap-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:gap-24">
+          <Guidance items={recs} note={profile.voice} stamp={stamp} />
+          <HardwareStatus reading={reading} mode="simulation" />
         </div>
+
       </section>
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">

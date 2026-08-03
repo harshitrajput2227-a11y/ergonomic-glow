@@ -229,33 +229,65 @@ export type Recommendation = {
   body: string;
   severity: "critical" | "warning" | "ok";
   impact: number;
+  /** Which physical sensor produced the reading behind this line. */
+  sensor: string;
 };
 
-export function recommend(r: SensorReading): Recommendation[] {
+/** Sensor hardware behind each measured channel — shown for transparency. */
+export const sensorOf: Record<MetricKey, { part: string; name: string }> = {
+  distance: { part: "HC-SR04", name: "Ultrasonic distance" },
+  light: { part: "LDR", name: "Ambient light" },
+  temperature: { part: "DHT11", name: "Temperature" },
+  humidity: { part: "DHT11", name: "Humidity" },
+};
+
+/**
+ * Distance wording. WHI measures viewing distance only — never posture.
+ * `sustainedMs` is how long the reading has stayed below the healthy band.
+ */
+export function distanceGuidance(distance: number, sustainedMs = 0) {
+  if (distance < 55) {
+    if (sustainedMs > 3 * 60_000) {
+      return {
+        title: "Viewing distance has stayed close for a while",
+        body: `Your viewing distance has remained below the recommended range for several minutes (currently ${Math.round(distance)} cm). This may increase visual discomfort and neck strain over time. Recommended ergonomic viewing distance is 55–75 cm.`,
+      };
+    }
+    return {
+      title: "You appear to be moving closer to the screen",
+      body: `Measured viewing distance is ${Math.round(distance)} cm. Consider moving your chair back slightly, or pushing the monitor away, to maintain a comfortable viewing distance of 55–75 cm.`,
+    };
+  }
+  if (distance > 78) {
+    return {
+      title: "You are sitting farther than recommended",
+      body: `Measured viewing distance is ${Math.round(distance)} cm. Consider moving slightly closer for comfortable viewing — the recommended ergonomic range is 55–75 cm.`,
+    };
+  }
+  return {
+    title: "Viewing distance is within the recommended ergonomic range",
+    body: `Measured at ${Math.round(distance)} cm. Keep the top of the screen at or just below eye level and your seating position relaxed.`,
+  };
+}
+
+export function recommend(r: SensorReading, sustainedCloseMs = 0): Recommendation[] {
   const out: Recommendation[] = [];
   const sev = (s: number): Recommendation["severity"] =>
     s < 55 ? "critical" : s < 82 ? "warning" : "ok";
 
   const ds = subScore("distance", r.distance);
+  const dg = distanceGuidance(r.distance, sustainedCloseMs);
   out.push({
     id: "distance",
     key: "distance",
     icon: "eye",
-    title:
-      r.distance < 55
-        ? "Push your monitor back"
-        : r.distance > 78
-          ? "Pull your monitor closer"
-          : "Viewing distance is healthy",
-    body:
-      r.distance < 55
-        ? `At ${Math.round(r.distance)}cm your eyes are accommodating hard. Aim for 55–75cm — roughly an arm's length — to cut focus fatigue.`
-        : r.distance > 78
-          ? `At ${Math.round(r.distance)}cm you're likely leaning in and squinting, which loads your neck. Bring the screen to 55–75cm.`
-          : "You're in the ergonomic sweet spot. Keep the top of the screen at or just below eye level.",
+    title: dg.title,
+    body: dg.body,
     severity: sev(ds),
     impact: Math.round((100 - ds) * metrics.distance.weight),
+    sensor: `${sensorOf.distance.part} · viewing distance`,
   });
+
 
   const ls = subScore("light", r.light);
   out.push({
@@ -276,6 +308,7 @@ export function recommend(r: SensorReading): Recommendation[] {
           : "Ambient light matches your screen brightness, minimising eye fatigue.",
     severity: sev(ls),
     impact: Math.round((100 - ls) * metrics.light.weight),
+    sensor: "LDR · ambient light",
   });
 
   const ts = subScore("temperature", r.temperature);
@@ -297,6 +330,7 @@ export function recommend(r: SensorReading): Recommendation[] {
           : "Temperature supports sustained focus without drowsiness.",
     severity: sev(ts),
     impact: Math.round((100 - ts) * metrics.temperature.weight),
+    sensor: "DHT11 · temperature",
   });
 
   const hs = subScore("humidity", r.humidity);
@@ -318,6 +352,7 @@ export function recommend(r: SensorReading): Recommendation[] {
           : "Air moisture is in the range that keeps eyes and airways comfortable.",
     severity: sev(hs),
     impact: Math.round((100 - hs) * metrics.humidity.weight),
+    sensor: "DHT11 · humidity",
   });
 
   return out.sort((a, b) => b.impact - a.impact);
@@ -325,8 +360,8 @@ export function recommend(r: SensorReading): Recommendation[] {
 
 export function actionPlan(r: SensorReading): string[] {
   const plan: string[] = [];
-  if (r.distance < 55) plan.push("Move your screen an arm's length away (55–75cm)");
-  if (r.distance > 78) plan.push("Bring your screen forward to 55–75cm");
+  if (r.distance < 55) plan.push("Consider adjusting your seating position back to a 55–75 cm viewing distance");
+  if (r.distance > 78) plan.push("Consider moving slightly closer — recommended viewing distance is 55–75 cm");
   if (r.light < 300) plan.push("Turn on a desk lamp to lift ambient light above 300 lux");
   if (r.light > 600) plan.push("Cut direct glare — angle the monitor or draw the blinds");
   if (r.temperature < 20.5) plan.push("Warm the room toward 22°C");
