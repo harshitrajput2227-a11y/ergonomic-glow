@@ -14,7 +14,7 @@ export const Route = createFileRoute("/replay")({
       {
         name: "description",
         content:
-          "WHI replays a full session as a story: the moment your posture slipped, the hour the light failed, the break that reset everything — with the room changing as it happened.",
+          "WHI replays a full session as a story: the moment your viewing distance drifted, the hour the light failed, the break that reset everything — with the room changing as it happened.",
       },
       { property: "og:title", content: "Workspace Replay — WHI" },
       {
@@ -70,7 +70,7 @@ const session: Moment[] = [
   {
     time: "13:10",
     title: "Break taken",
-    note: "You stand up, look out of the window, and come back. Distance resets and the score recovers most of what posture had cost. This is the cheapest point recovery in the whole day.",
+    note: "You stand up, look out of the window, and come back. Viewing distance resets and the score recovers most of what the close positioning had cost. This is the cheapest point recovery in the whole day.",
     reading: { distance: 64, light: 520, temperature: 25.1, humidity: 38 },
     focus: "distance",
   },
