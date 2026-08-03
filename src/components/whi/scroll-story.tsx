@@ -81,7 +81,7 @@ const chapters: Chapter[] = [
     eyebrow: "06 · Arrival",
     title: "Now you are sitting at it.",
     body: "The camera stops where you work. From here the room stops being a story and becomes the instrument — every control below moves this same desk.",
-    camera: { x: 610, y: 196, w: 540 },
+    camera: { x: 300, y: 96, w: 860 },
     focus: null,
     reading: ideal,
   },
