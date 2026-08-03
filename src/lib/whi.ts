@@ -308,6 +308,7 @@ export function recommend(r: SensorReading, sustainedCloseMs = 0): Recommendatio
           : "Ambient light matches your screen brightness, minimising eye fatigue.",
     severity: sev(ls),
     impact: Math.round((100 - ls) * metrics.light.weight),
+    sensor: "LDR · ambient light",
   });
 
   const ts = subScore("temperature", r.temperature);
@@ -329,6 +330,7 @@ export function recommend(r: SensorReading, sustainedCloseMs = 0): Recommendatio
           : "Temperature supports sustained focus without drowsiness.",
     severity: sev(ts),
     impact: Math.round((100 - ts) * metrics.temperature.weight),
+    sensor: "DHT11 · temperature",
   });
 
   const hs = subScore("humidity", r.humidity);
@@ -350,6 +352,7 @@ export function recommend(r: SensorReading, sustainedCloseMs = 0): Recommendatio
           : "Air moisture is in the range that keeps eyes and airways comfortable.",
     severity: sev(hs),
     impact: Math.round((100 - hs) * metrics.humidity.weight),
+    sensor: "DHT11 · humidity",
   });
 
   return out.sort((a, b) => b.impact - a.impact);
