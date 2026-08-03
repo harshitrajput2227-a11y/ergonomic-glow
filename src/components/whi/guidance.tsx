@@ -6,8 +6,11 @@ export function Guidance({ items, note }: { items: Recommendation[]; note?: stri
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <span className="label-eyebrow">What to do next</span>
-        <span className="text-xs text-muted-foreground">Ranked by points recoverable</span>
+        <span className="text-xs text-muted-foreground">
+          Ranked by points recoverable ·每 line traced to its sensor
+        </span>
       </div>
+
 
       {note && (
         <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-signal/90">{note}</p>
