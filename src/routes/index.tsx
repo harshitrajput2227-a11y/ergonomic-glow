@@ -8,7 +8,9 @@ import { Narrative } from "@/components/whi/narrative";
 import { Guidance } from "@/components/whi/guidance";
 import { BreakTimer } from "@/components/whi/break-timer";
 import { Analytics, type HistoryPoint } from "@/components/whi/analytics";
-import { useSmoothNumber } from "@/lib/use-smooth-number";
+import { DataFlow } from "@/components/whi/data-flow";
+import { HardwareStatus } from "@/components/whi/hardware-status";
+import { ScoreRing } from "@/components/whi/score-ring";
 import { useWorkspaceConfig } from "@/lib/workspace-config";
 import { focusLength, personalize } from "@/lib/whi-profile";
 import {
@@ -22,6 +24,7 @@ import {
   type Reasoning,
   type SensorReading,
 } from "@/lib/whi";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
