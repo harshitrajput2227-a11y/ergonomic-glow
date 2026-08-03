@@ -60,13 +60,15 @@ function Dashboard() {
   const [breaks, setBreaks] = useState(0);
   const startedAt = useRef(0);
   const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** How long viewing distance has stayed below the recommended band. */
+  const closeSince = useRef<number | null>(null);
+  const [sustainedCloseMs, setSustainedCloseMs] = useState(0);
 
   useEffect(() => {
     startedAt.current = Date.now();
   }, []);
 
   const score = healthScore(reading);
-  const smooth = useSmoothNumber(score, 0.1);
   const status = statusOf(score);
   const tone = statusTone(status);
 
@@ -89,11 +91,30 @@ function Dashboard() {
   useEffect(() => {
     const id = setInterval(() => {
       setHistory((h) => [...h.slice(-119), { t: Date.now(), score: healthScore(reading), ...reading }]);
+      if (reading.distance < 55) {
+        closeSince.current ??= Date.now();
+        setSustainedCloseMs(Date.now() - closeSince.current);
+      } else {
+        closeSince.current = null;
+        setSustainedCloseMs(0);
+      }
     }, 3000);
     return () => clearInterval(id);
   }, [reading]);
 
-  const recs = useMemo(() => personalize(recommend(reading), profile), [reading, profile]);
+  const recs = useMemo(
+    () => personalize(recommend(reading, sustainedCloseMs), profile),
+    [reading, sustainedCloseMs, profile],
+  );
+
+  /** Subtle dolly: the tighter the viewing distance, the closer the camera sits. */
+  const closeness = Math.max(0, Math.min(1, (72 - reading.distance) / 40));
+  const camera = {
+    x: Math.round(70 * closeness),
+    y: Math.round(34 * closeness),
+    w: Math.round(1200 - 150 * closeness),
+  };
+
 
   return (
     <main className="bg-deep">
