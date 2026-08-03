@@ -360,8 +360,8 @@ export function recommend(r: SensorReading, sustainedCloseMs = 0): Recommendatio
 
 export function actionPlan(r: SensorReading): string[] {
   const plan: string[] = [];
-  if (r.distance < 55) plan.push("Move your screen an arm's length away (55–75cm)");
-  if (r.distance > 78) plan.push("Bring your screen forward to 55–75cm");
+  if (r.distance < 55) plan.push("Consider adjusting your seating position back to a 55–75 cm viewing distance");
+  if (r.distance > 78) plan.push("Consider moving slightly closer — recommended viewing distance is 55–75 cm");
   if (r.light < 300) plan.push("Turn on a desk lamp to lift ambient light above 300 lux");
   if (r.light > 600) plan.push("Cut direct glare — angle the monitor or draw the blinds");
   if (r.temperature < 20.5) plan.push("Warm the room toward 22°C");
