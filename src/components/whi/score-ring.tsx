@@ -14,13 +14,12 @@ export function ScoreRing({ score, size = 260 }: { score: number; size?: number 
   const [improving, setImproving] = useState(false);
 
   useEffect(() => {
-    if (score > prev.current) {
-      setImproving(true);
-      const t = setTimeout(() => setImproving(false), 1600);
-      prev.current = score;
-      return () => clearTimeout(t);
-    }
+    const rising = score > prev.current;
     prev.current = score;
+    if (!rising) return undefined;
+    setImproving(true);
+    const t = setTimeout(() => setImproving(false), 1600);
+    return () => clearTimeout(t);
   }, [score]);
 
   const r = 46;
