@@ -1,7 +1,7 @@
 import type { Recommendation } from "@/lib/whi";
 
 /** Ranked guidance as an editorial list — numbered, quiet, no card chrome. */
-export function Guidance({ items, note }: { items: Recommendation[]; note?: string }) {
+export function Guidance({ items, note, stamp = 0 }: { items: Recommendation[]; note?: string; stamp?: number }) {
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -16,7 +16,7 @@ export function Guidance({ items, note }: { items: Recommendation[]; note?: stri
         <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-signal/90">{note}</p>
       )}
 
-      <ol className="mt-6 divide-y divide-border">
+      <ol key={stamp} className="mt-6 divide-y divide-border">
         {items.map((r, i) => {
           const tone =
             r.severity === "critical"
