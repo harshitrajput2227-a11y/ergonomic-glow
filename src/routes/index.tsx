@@ -141,7 +141,7 @@ function Dashboard() {
       <ScrollStory onChapter={applyReading} />
 
       {/* HANDOVER — the room becomes yours to drive */}
-      <section className="mx-auto max-w-[1240px] px-6 pt-28 md:px-10 md:pt-40">
+      <section className="mx-auto max-w-[1240px] px-6 pt-24 md:px-10 md:pt-32">
         <span className="label-eyebrow">Now you drive it</span>
         <h2 className="mt-4 max-w-[20ch] text-[34px] leading-[1.05] md:text-[52px]">
           Take the controls and watch the room answer.
@@ -149,20 +149,19 @@ function Dashboard() {
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_300px] lg:items-end">
           <div className="animate-fade">
-            <WorkspaceScene reading={reading} setup={setup} />
+            <WorkspaceScene reading={reading} setup={setup} camera={camera} />
           </div>
           <div className="lg:pb-2">
             <span className="label-eyebrow">Workspace health</span>
-            <div className="mt-3 flex items-end gap-2">
-              <span
-                className="display-num text-[96px] md:text-[124px]"
-                style={{ color: tone.color, transition: "color 900ms ease" }}
-              >
-                {Math.round(smooth)}
-              </span>
-              <span className="mono-num pb-4 text-sm text-muted-foreground">/100</span>
+            <div className="mt-4">
+              <ScoreRing score={score} />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">{status}</p>
+            <p className="mt-4 text-sm" style={{ color: tone.color, transition: "color 900ms ease" }}>
+              {status}
+            </p>
+            <div className="mt-8">
+              <DataFlow stamp={stamp} label={`${score} pts committed`} />
+            </div>
           </div>
         </div>
       </section>
@@ -175,9 +174,11 @@ function Dashboard() {
       </section>
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
-        <div className="hairline-t pt-12">
-          <Guidance items={recs} note={profile.voice} />
+        <div className="hairline-t grid gap-16 pt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:gap-24">
+          <Guidance items={recs} note={profile.voice} stamp={stamp} />
+          <HardwareStatus reading={reading} mode="simulation" />
         </div>
+
       </section>
 
       <section className="mx-auto mt-24 max-w-[1240px] px-6 md:px-10">
